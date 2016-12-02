@@ -177,7 +177,8 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
         _nextButton = [[UIBarButtonItem alloc] initWithImage:nextButtonImage style:UIBarButtonItemStylePlain target:self action:@selector(gotoNextPage)];
     }
     if (self.displayActionButton) {
-        _actionButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(actionButtonPressed:)];
+        _actionButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"btn_more"] style:UIBarButtonItemStylePlain target:self action:@selector(actionButtonPressed:)];
+//        _actionButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(actionButtonPressed:)];
     }
     
     // Update
@@ -244,6 +245,9 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     if (_enableGrid) {
         hasItems = YES;
         [items addObject:[[UIBarButtonItem alloc] initWithImage:[UIImage imageForResourcePath:@"MWPhotoBrowser.bundle/UIBarButtonItemGrid" ofType:@"png" inBundle:[NSBundle bundleForClass:[self class]]] style:UIBarButtonItemStylePlain target:self action:@selector(showGridAnimated)]];
+    } else if ([self.delegate customLowerLeftButtonForPhotoBrowser:self]) {
+        hasItems = YES;
+        [items addObject:[self.delegate customLowerLeftButtonForPhotoBrowser:self]];
     } else {
         [items addObject:fixedSpace];
     }
@@ -253,7 +257,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
         hasItems = YES;
         [items addObject:flexSpace];
         [items addObject:_previousButton];
-        [items addObject:flexSpace];
+        [items addObject:fixedSpace];
         [items addObject:_nextButton];
         [items addObject:flexSpace];
     } else {
@@ -485,7 +489,10 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 
 - (void)viewWillLayoutSubviews {
     [super viewWillLayoutSubviews];
-    [self layoutVisiblePages];
+    if (!_performingToolbarChanges)
+        [self layoutVisiblePages];
+    else
+        _performingToolbarChanges = NO;
 }
 
 - (void)layoutVisiblePages {
@@ -539,6 +546,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 	
 	// Adjust contentOffset to preserve page location based on values collected prior to location
 	_pagingScrollView.contentOffset = [self contentOffsetForPageAtIndex:indexPriorToLayout];
+    _performingToolbarChanges = YES;
 	[self didStartViewingPageAtIndex:_currentPageIndex]; // initial
     
 	// Reset
@@ -959,8 +967,10 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     
     // Notify delegate
     if (index != _previousPageIndex) {
-        if ([_delegate respondsToSelector:@selector(photoBrowser:didDisplayPhotoAtIndex:)])
+        if ([_delegate respondsToSelector:@selector(photoBrowser:didDisplayPhotoAtIndex:)]) {
+            _performingToolbarChanges = YES;
             [_delegate photoBrowser:self didDisplayPhotoAtIndex:index];
+        }
         _previousPageIndex = index;
     }
     
@@ -1146,6 +1156,10 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 
 - (void)showNextPhotoAnimated:(BOOL)animated {
     [self jumpToPageAtIndex:_currentPageIndex+1 animated:animated];
+}
+
+- (void)makeBrowserDismiss {
+    [self doneButtonPressed:nil];
 }
 
 #pragma mark - Interactions

@@ -65,6 +65,7 @@
     BOOL _displayActionButton;
     BOOL _leaveStatusBarAlone;
 	BOOL _performingLayout;
+    BOOL _performingToolbarChanges;
 	BOOL _rotating;
     BOOL _viewIsActive; // active as in it's in the view heirarchy
     BOOL _didSavePreviousStateOfNavBar;

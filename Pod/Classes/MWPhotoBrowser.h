@@ -24,6 +24,7 @@
 
 - (NSUInteger)numberOfPhotosInPhotoBrowser:(MWPhotoBrowser *)photoBrowser;
 - (id <MWPhoto>)photoBrowser:(MWPhotoBrowser *)photoBrowser photoAtIndex:(NSUInteger)index;
+- (UIBarButtonItem *)customLowerLeftButtonForPhotoBrowser:(MWPhotoBrowser *)browser;
 
 @optional
 
@@ -71,5 +72,6 @@
 // Navigation
 - (void)showNextPhotoAnimated:(BOOL)animated;
 - (void)showPreviousPhotoAnimated:(BOOL)animated;
+- (void)makeBrowserDismiss;
 
 @end
